@@ -90,7 +90,7 @@ class UIHelper{
     );
   }
 
-  static buildRaisedButton(text, Function onPressedFunc,{double height=70.0,double width=double.infinity,double elevation=2.0,
+  static buildRaisedButton(child, Function onPressedFunc,{double height=70.0,double width=double.infinity,double elevation=2.0,
           double borderRadius=5.0,Color color=Colors.black,Color textColor=Colors.white,
           FontWeight fontWeight=FontWeight.w800,double fontSize=18.0}){
 
@@ -104,10 +104,16 @@ class UIHelper{
           onPressed: () => onPressedFunc(),
           color: color,
           textColor: textColor,
-          child: Text(text, 
-              style: TextStyle(fontWeight: fontWeight, fontSize: fontSize),),
+          child: child
         ),
       );
+  }
+
+  static buildIconButton(icon,onPressedFunc){
+    return IconButton(
+      icon: icon,
+      onPressed:()=> onPressedFunc
+    );
   }
 
   static buildRoundedRectangleBorder({double radius=10.0}){
