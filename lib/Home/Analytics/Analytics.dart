@@ -14,12 +14,13 @@ class Analytics extends StatefulWidget {
 
 class _AnalyticsState extends State<Analytics> {
   List<String> subjects = ['Math','Science','Social Science','English'];
-  List<String> schools = ['Tyndale Biscoe School','Burn Hall School','Presentation Convent School'];
+  List<String> schools = ['Tyndale Biscoe School','Burn Hall School','Presentation Convent School','Delhi Public School'];
   String selected_subject = 'Math';
   String selected_school = 'Tyndale Biscoe School';
   List top_ten_students_across_all_schools = [];
   List top_ten_students_across_school = [];
   List top_ten_schools = [];
+  List top_ten_schools_in_subject = [];
   List top_ten_students_in_subject_across_all_schools = [];
   List top_ten_students_in_subject_across_school = [];
 
@@ -37,6 +38,7 @@ class _AnalyticsState extends State<Analytics> {
     fetchTopTenStudentsAcrossAllSchools();
     fetchTopTenStudentsAcrossSchool();
     fetchTopTenSchools();
+    fetchTopTenSchoolsInSubject();
     fetchTopTenStudentsInSubjectAcrossAllSchools();
     fetchTopTenStudentsInSubjectAcrossSchool();
   }
@@ -44,14 +46,14 @@ class _AnalyticsState extends State<Analytics> {
   fetchTopTenStudentsAcrossAllSchools()async{
    Response res = await DbProxy.getData("analytics/top-ten/students/all");
    setState(() {
-     top_ten_students_across_school = json.decode(res.body);
+     top_ten_students_across_all_schools = json.decode(res.body);
    });
   }
 
   fetchTopTenStudentsAcrossSchool()async{
-    Response res = await DbProxy.getData("analytics/top-ten/students/school/$selected_school/yearly");
+    Response res = await DbProxy.getData("analytics/top-ten/students/$selected_school/yearly");
    setState(() {
-     top_ten_students_across_all_schools = json.decode(res.body);
+     top_ten_students_across_school = json.decode(res.body);
    });
   }
 
@@ -59,6 +61,13 @@ class _AnalyticsState extends State<Analytics> {
    Response res = await DbProxy.getData("analytics/top-ten/schools/all");
    setState(() {
      top_ten_schools = json.decode(res.body);
+   });
+  }
+
+  fetchTopTenSchoolsInSubject()async{
+    Response res = await DbProxy.getData("analytics/top-ten/schools/$selected_subject/yearly");
+   setState(() {
+     top_ten_schools_in_subject = json.decode(res.body);
    });
   }
 
@@ -70,7 +79,7 @@ class _AnalyticsState extends State<Analytics> {
   }
 
   fetchTopTenStudentsInSubjectAcrossSchool()async{
-   Response res = await DbProxy.getData("analytics/top-ten/subject/school/$selected_school/$selected_subject/yearly");
+   Response res = await DbProxy.getData("analytics/top-ten/subject/$selected_school/$selected_subject/yearly");
    setState(() {
      top_ten_students_in_subject_across_school = json.decode(res.body);
    });
@@ -91,9 +100,11 @@ class AnalyticsView extends StatelessWidget {
             children: <Widget>[
               showTopTenStudentsAcrossAllSchools(),
               Padding(padding: EdgeInsets.symmetric(vertical: 10.0)),
-              // showTopTenStudentsAcrossSchool(),
-              // Padding(padding: EdgeInsets.symmetric(vertical: 10.0)),
+              showTopTenStudentsAcrossSchool(),
+              Padding(padding: EdgeInsets.symmetric(vertical: 10.0)),
               showTopTenSchools(),
+              Padding(padding: EdgeInsets.symmetric(vertical: 10.0)),
+              showTopTenSchoolsInSubject(),
               Padding(padding: EdgeInsets.symmetric(vertical: 10.0)),
               showTopTenStudentsInSubjectAcrossAllSchools(),
               Padding(padding: EdgeInsets.symmetric(vertical: 10.0)),
@@ -107,25 +118,25 @@ class AnalyticsView extends StatelessWidget {
   showTopTenStudentsAcrossAllSchools(){
     return  Column(
         // shrinkWrap: true,
-        children: buildStudentList(state.top_ten_students_across_all_schools,"Top 10 Students - All Schools")
+        children: buildStudentList(state.top_ten_students_across_all_schools,"Top 10 Students")
       
     );
   }
 
   showTopTenStudentsAcrossSchool(){
     Widget drop_down_button = DropdownButton(
-      items: buildDropDownItems(state.subjects),
+      items: buildDropDownItems(state.schools),
       onChanged: (val){
-        state.selected_subject = val;
+        state.selected_school = val;
         state.fetchTopTenStudentsAcrossSchool();
       },
-      value: state.selected_subject,
+      value: state.selected_school,
     );
 
     return  Column(
         children: buildStudentList(
           state.top_ten_students_across_school,
-          "Top Ten Students Across School",
+          "Top 10 Students Across School",
           select_menu: drop_down_button
         )
     );
@@ -133,7 +144,26 @@ class AnalyticsView extends StatelessWidget {
 
   showTopTenSchools(){
     return  Column(
-        children: buildSchoolList(state.top_ten_schools)
+        children: buildSchoolList(state.top_ten_schools, "Top 10 Schools" )
+    );
+  }
+
+  showTopTenSchoolsInSubject(){
+    Widget drop_down_button = DropdownButton(
+      items: buildDropDownItems(state.subjects),
+      onChanged: (val){
+        state.selected_subject = val;
+        state.fetchTopTenSchoolsInSubject();
+      },
+      value: state.selected_subject,
+    );
+
+    return  Column(
+        children: buildSchoolList(
+          state.top_ten_schools_in_subject,
+          "Top 10 Schools In A Subject",
+          select_menu: drop_down_button
+        )
     );
   }
 
@@ -150,7 +180,7 @@ class AnalyticsView extends StatelessWidget {
     return  Column(
         children: buildStudentList(
           state.top_ten_students_in_subject_across_all_schools,
-          "Top Ten Students Across Subject - All Schools",
+          "Top 10 Students Across Subject - All Schools",
           select_menu: drop_down_button
         )
     );
@@ -182,7 +212,7 @@ class AnalyticsView extends StatelessWidget {
     return  Column(
         children: buildStudentList(
           state.top_ten_students_in_subject_across_school,
-          "Top Ten Students Across Subject",
+          "Top 10 Students Across Subject",
           select_menu: drop_down_buttons
         )
     );
@@ -225,8 +255,10 @@ class AnalyticsView extends StatelessWidget {
     return items;
   }
 
-  buildSchoolList(List list){
-    List<Widget> items =  [ buildTitle("Top 10 Schools"),Padding(padding: EdgeInsets.symmetric(vertical: 7.0)),];
+  buildSchoolList(List list , String title, { Widget select_menu = null}){
+    List<Widget> items =  [ buildTitle(title),Padding(padding: EdgeInsets.symmetric(vertical: 7.0)),];
+
+    if(select_menu != null) items.add(select_menu);
 
     list.forEach((item) { 
       items.add(  
