@@ -17,6 +17,7 @@ class _AnalyticsState extends State<Analytics> {
   List<String> schools = ['Tyndale Biscoe School','Burn Hall School','Presentation Convent School','Delhi Public School'];
   String selected_subject = 'Math';
   String selected_school = 'Tyndale Biscoe School';
+  String type = 'yearly';
   List top_ten_students_across_all_schools = [];
   List top_ten_students_across_school = [];
   List top_ten_schools = [];
@@ -44,42 +45,42 @@ class _AnalyticsState extends State<Analytics> {
   }
 
   fetchTopTenStudentsAcrossAllSchools()async{
-   Response res = await DbProxy.getData("analytics/top-ten/students/all");
+   Response res = await DbProxy.getData("analytics/top-ten/students/all/$type");
    setState(() {
      top_ten_students_across_all_schools = json.decode(res.body);
    });
   }
 
   fetchTopTenStudentsAcrossSchool()async{
-    Response res = await DbProxy.getData("analytics/top-ten/students/$selected_school/yearly");
+    Response res = await DbProxy.getData("analytics/top-ten/students/$selected_school/$type");
    setState(() {
      top_ten_students_across_school = json.decode(res.body);
    });
   }
 
   fetchTopTenSchools()async{
-   Response res = await DbProxy.getData("analytics/top-ten/schools/all");
+   Response res = await DbProxy.getData("analytics/top-ten/schools/all/$type");
    setState(() {
      top_ten_schools = json.decode(res.body);
    });
   }
 
   fetchTopTenSchoolsInSubject()async{
-    Response res = await DbProxy.getData("analytics/top-ten/schools/$selected_subject/yearly");
+    Response res = await DbProxy.getData("analytics/top-ten/schools/$selected_subject/$type");
    setState(() {
      top_ten_schools_in_subject = json.decode(res.body);
    });
   }
 
   fetchTopTenStudentsInSubjectAcrossAllSchools()async{
-   Response res = await DbProxy.getData("analytics/top-ten/subject/all/$selected_subject/yearly");
+   Response res = await DbProxy.getData("analytics/top-ten/subject/all/$selected_subject/$type");
    setState(() {
      top_ten_students_in_subject_across_all_schools = json.decode(res.body);
    });
   }
 
   fetchTopTenStudentsInSubjectAcrossSchool()async{
-   Response res = await DbProxy.getData("analytics/top-ten/subject/$selected_school/$selected_subject/yearly");
+   Response res = await DbProxy.getData("analytics/top-ten/subject/$selected_school/$selected_subject/$type");
    setState(() {
      top_ten_students_in_subject_across_school = json.decode(res.body);
    });
@@ -136,7 +137,7 @@ class AnalyticsView extends StatelessWidget {
     return  Column(
         children: buildStudentList(
           state.top_ten_students_across_school,
-          "Top 10 Students Across School",
+          "Top 10 Students In School",
           select_menu: drop_down_button
         )
     );
@@ -161,7 +162,7 @@ class AnalyticsView extends StatelessWidget {
     return  Column(
         children: buildSchoolList(
           state.top_ten_schools_in_subject,
-          "Top 10 Schools In A Subject",
+          "Top 10 Schools In Subject",
           select_menu: drop_down_button
         )
     );
@@ -180,7 +181,7 @@ class AnalyticsView extends StatelessWidget {
     return  Column(
         children: buildStudentList(
           state.top_ten_students_in_subject_across_all_schools,
-          "Top 10 Students Across Subject - All Schools",
+          "Top 10 Students In Subject",
           select_menu: drop_down_button
         )
     );
@@ -212,7 +213,7 @@ class AnalyticsView extends StatelessWidget {
     return  Column(
         children: buildStudentList(
           state.top_ten_students_in_subject_across_school,
-          "Top 10 Students Across Subject",
+          "Top 10 Students In Subject In School",
           select_menu: drop_down_buttons
         )
     );
